@@ -1,0 +1,45 @@
+﻿<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Travelex (patched loader)</title>
+  <link rel="stylesheet" href="./assets/styles-BnxLVeEO.css">
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    // SSR runtime stubs
+    window.$_TSR = window.$_TSR || {};
+    window.$_TSR.buffer = window.$_TSR.buffer || [];
+    window.$_TSR.t = window.$_TSR.t || new Map();
+    window.$_TSR.initialized = window.$_TSR.initialized || false;
+    window.$_TSR.h = window.$_TSR.h || function(){};
+    window.$_TSR.router = window.$_TSR.router || { matches: [], lastMatchId: null, manifest: null, dehydratedData: null };
+    window.__TSS_START_OPTIONS__ = window.__TSS_START_OPTIONS__ || { serializationAdapters: [] };
+
+    window.addEventListener('error', function(e){
+      try{ console.error('GLOBAL ERROR', e.error || e.message || e, {window_TS: window.$_TSR, router: window.$_TSR && window.$_TSR.router}); }catch(err){console.error('Error while logging global error', err)}
+    });
+    window.addEventListener('unhandledrejection', function(e){
+      try{ console.error('UNHANDLED REJECTION', e.reason || e, {window_TS: window.$_TSR, router: window.$_TSR && window.$_TSR.router}); }catch(err){console.error('Error while logging rejection', err)}
+    });
+
+    console && console.log && console.log('DEBUG: pre-patch $_TSR', window.$_TSR, window.$_TSR.router);
+  </script>
+  <script type="module">
+    (async function(){
+      try{
+        console && console.log && console.log('DEBUG: fetching client bundle for runtime patch');
+        const res = await fetch('./assets/index-Z9W6EcjW.js');
+        let src = await res.text();
+        // Replace the invariant throw with logging to capture SSR state
+        src = src.replace(/function Re\(\)\{throw new Error\("Invariant failed"\)\}/g, 'function Re(){try{console.error("INVARIANT (patched) - window.$_TSR:",window.$_TSR,"router:",window.$_TSR&&window.$_TSR.router)}catch(e){}return}');
+        const blob = new Blob([src], { type: 'text/javascript' });
+        const url = URL.createObjectURL(blob);
+        await import(url);
+      }catch(e){console && console.error && console.error('Error loading patched client bundle',e)}
+    })();
+  </script>
+</body>
+</html>
